@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;servlet_crud&apos;&#x0D;&#x0A;- Original project: &apos;servlet_crud&apos;&#x0D;&#x0A;- Original element: &apos;apache-tomcat-10.1.28&apos;" description="Delete element" element1="apache-tomcat-10.1.28" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="1" stamp="1732196387802" subPackages="false" version="1.0"/>
+</session>

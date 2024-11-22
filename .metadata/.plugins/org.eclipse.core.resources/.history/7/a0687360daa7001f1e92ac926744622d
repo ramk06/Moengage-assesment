@@ -1,0 +1,70 @@
+package com.servlet;
+
+import java.io.IOException;
+import com.entity.*;
+@WebServlet("servlet/SignupServlet")
+public class SignupServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Get form data
+        String username = req.getParameter("username");
+        String email = req.getParameter("email");
+        String password = req.getParameter("password");
+        
+        System.out.println("Username: " + username);
+        System.out.println("Email: " + email);
+        System.out.println("Password: " + password);
+
+
+        // Input validation
+        if (username == null || username.isEmpty() || 
+            email == null || email.isEmpty() || 
+            password == null || password.isEmpty()) {
+            resp.sendRedirect("signup.jsp?error=invalid");
+            return;
+        }
+
+        // Create User object and set properties
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(password);
+
+        // Initialize JPA components
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory("E1");
+        EntityManager manager = factory.createEntityManager();
+        EntityTransaction transaction = manager.getTransaction();
+
+        try {
+            transaction.begin();
+
+            // Check if the user already exists
+            User existingUser = manager.find(User.class, username);
+            if (existingUser != null) {
+                // User already exists
+                resp.sendRedirect("signup.jsp?error=exists");
+            } else {
+                // Save the new user to the database
+                manager.persist(user);
+                transaction.commit();
+
+                // Redirect to login page
+                resp.sendRedirect("login.jsp?message=registered");
+            }
+        } catch (Exception e) {
+            // Rollback in case of an error
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            resp.sendRedirect("signup.jsp?error=exception");
+        } finally {
+            if (manager != null) {
+                manager.close();
+            }
+            factory.close();
+        }
+    }
+}

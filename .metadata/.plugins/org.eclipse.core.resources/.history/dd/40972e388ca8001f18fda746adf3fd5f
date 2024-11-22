@@ -1,0 +1,111 @@
+package com.servlet;
+
+import java.io.IOException;
+import java.util.Date;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/editList")
+public class EditListServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = (String) request.getSession().getAttribute("username");
+
+        // Validate session
+        if (username == null) {
+            response.sendRedirect("login.jsp?error=unauthorized");
+            return;
+        }
+
+        String listId = request.getParameter("listId");
+
+        if (listId == null || listId.isEmpty()) {
+            response.sendRedirect("lists.jsp?error=invalidlist");
+            return;
+        }
+
+        EntityManagerFactory factory = null;
+        EntityManager manager = null;
+
+        try {
+            factory = Persistence.createEntityManagerFactory("E1");
+            manager = factory.createEntityManager();
+
+            // Fetch the list for the user
+            com.entity.List list = manager.find(com.entity.List.class, Integer.parseInt(listId));
+            if (list != null && list.getUsername().equals(username)) {
+                request.setAttribute("list", list);
+                request.getRequestDispatcher("editList.jsp").forward(request, response);
+            } else {
+                response.sendRedirect("lists.jsp?error=unauthorized");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("lists.jsp?error=exception");
+        } finally {
+            if (manager != null) manager.close();
+            if (factory != null) factory.close();
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = (String) request.getSession().getAttribute("username");
+
+        // Validate session
+        if (username == null) {
+            response.sendRedirect("login.jsp?error=unauthorized");
+            return;
+        }
+
+        String listId = request.getParameter("listId");
+        String newName = request.getParameter("name");
+
+        if (listId == null || listId.isEmpty() || newName == null || newName.isEmpty()) {
+            response.sendRedirect("lists.jsp?error=invalidinput");
+            return;
+        }
+
+        EntityManagerFactory factory = null;
+        EntityManager manager = null;
+        EntityTransaction transaction = null;
+
+        try {
+            factory = Persistence.createEntityManagerFactory("E1");
+            manager = factory.createEntityManager();
+            transaction = manager.getTransaction();
+
+            transaction.begin();
+
+            // Fetch the list
+            com.entity.List list = manager.find(com.entity.List.class, Integer.parseInt(listId));
+            if (list != null && list.getUsername().equals(username)) {
+                list.setName(newName);
+                list.setCreationDate(new Date()); // Update the creation date to the current time
+                manager.merge(list);
+                transaction.commit();
+                response.sendRedirect("lists.jsp?success=updated");
+            } else {
+                response.sendRedirect("lists.jsp?error=unauthorized");
+            }
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            response.sendRedirect("lists.jsp?error=exception");
+        } finally {
+            if (manager != null) manager.close();
+            if (factory != null) factory.close();
+        }
+    }
+}

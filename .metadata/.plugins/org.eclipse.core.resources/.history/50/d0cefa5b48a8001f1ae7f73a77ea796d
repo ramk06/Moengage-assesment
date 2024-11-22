@@ -1,0 +1,74 @@
+package com.servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/search")
+public class SearchServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Retrieve filter input
+        String filter = request.getParameter("filter");
+
+        // Validate the input
+        if (isInvalidFilter(filter)) {
+            response.sendRedirect("search.jsp?error=invalid");
+            return;
+        }
+
+        // Generate response codes based on filter
+        List<String> responseCodes = generateResponseCodes(filter);
+
+        // Fetch image URLs
+        List<String> images = fetchImageUrls(responseCodes);
+
+        // Pass the images to the JSP
+        request.setAttribute("images", images);
+        request.getRequestDispatcher("search.jsp").forward(request, response);
+    }
+
+    // Validates the filter input
+    private boolean isInvalidFilter(String filter) {
+        return filter == null || filter.isEmpty();
+    }
+
+    // Generates response codes based on the filter
+    private List<String> generateResponseCodes(String filter) {
+        List<String> codes = new ArrayList<>();
+
+        if (filter.endsWith("x")) { // Handle 'x' wildcard filters
+            char prefix = filter.charAt(0);
+            for (int i = 0; i <= 9; i++) {
+                codes.add(prefix + "" + i);
+            }
+        } else if (filter.endsWith("xx")) { // Handle 'xx' wildcard filters
+            char prefix = filter.charAt(0);
+            for (int i = 0; i <= 9; i++) {
+                for (int j = 0; j <= 9; j++) {
+                    codes.add(prefix + "" + i + j);
+                }
+            }
+        } else {
+            codes.add(filter); // Exact match
+        }
+
+        return codes;
+    }
+
+    // Fetches the image URLs corresponding to the response codes
+    private List<String> fetchImageUrls(List<String> responseCodes) {
+        List<String> images = new ArrayList<>();
+        for (String code : responseCodes) {
+            images.add("https://http.dog/" + code + ".jpg");
+        }
+        return images;
+    }
+}

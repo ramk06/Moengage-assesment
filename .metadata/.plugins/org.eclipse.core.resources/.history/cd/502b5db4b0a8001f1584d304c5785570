@@ -1,0 +1,47 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="true" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Lists</title>
+<style>
+.logout-button {
+    padding: 10px 15px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.logout-button:hover {
+    background-color: #c82333;
+}
+</style>
+</head>
+</head>
+<body>
+	<div class="header">
+		<h1>My Lists</h1>
+		<p>Welcome, <%= session.getAttribute("username") %></p>
+		<a href="logout" class="logout-button">Logout</a>
+	</div>
+	<div class="container">
+		<h2>Your Saved Lists</h2>
+		<ul>
+			<% java.util.List<com.entity.List> lists = (java.util.List<com.entity.List>) request.getAttribute("lists");
+			if (lists != null && !lists.isEmpty()) {
+				for (com.entity.List list : lists) { %>
+					<li>
+						<%= list.getName() %> 
+						<a href="editList?listId=<%= list.getId() %>">Edit</a>
+						<a href="deleteList?listId=<%= list.getId() %>">Delete</a>
+					</li>
+			<% } } else { %>
+				<p>No saved lists found.</p>
+			<% } %>
+		</ul>
+	</div>
+</html>

@@ -1,0 +1,73 @@
+package com.servlet;
+
+import java.io.IOException;
+import java.util.Date;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.entity.ListItem;
+import com.entity.List;
+
+@WebServlet("/saveToList")
+public class SaveListServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = (String) request.getSession().getAttribute("username");
+        String listId = request.getParameter("listId");
+        String responseCode = request.getParameter("responseCode");
+        String imageUrl = request.getParameter("imageUrl");
+
+        // Validate session and parameters
+        if (username == null || listId == null || responseCode == null || imageUrl == null) {
+            response.sendRedirect("search.jsp?error=invalidinput");
+            return;
+        }
+
+        EntityManagerFactory factory = null;
+        EntityManager manager = null;
+        EntityTransaction transaction = null;
+
+        try {
+            factory = Persistence.createEntityManagerFactory("E1");
+            manager = factory.createEntityManager();
+            transaction = manager.getTransaction();
+
+            transaction.begin();
+
+            // Fetch the list
+            List list = manager.find(List.class, Integer.parseInt(listId));
+            if (list != null && username.equals(list.getUsername())) {
+                // Create and persist the list item
+                ListItem item = new ListItem();
+                item.setList(list);
+                item.setResponseCode(responseCode);
+                item.setImageUrl(imageUrl);
+
+                manager.persist(item);
+
+                transaction.commit();
+                response.sendRedirect("search.jsp?success=added");
+            } else {
+                response.sendRedirect("search.jsp?error=unauthorized");
+            }
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            response.sendRedirect("search.jsp?error=exception");
+        } finally {
+            if (manager != null) manager.close();
+            if (factory != null) factory.close();
+        }
+    }
+}

@@ -1,0 +1,10 @@
+INDEX VERSION 1.4+C:\Users\USER\Desktop\Moengage Assignment\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+2990459950.index
+3406803919.index
+2090707769.index
+2090707769.index
+280405254.index
+1173973566.index
+1590531744.index
+1224462830.index
+1328088204.index

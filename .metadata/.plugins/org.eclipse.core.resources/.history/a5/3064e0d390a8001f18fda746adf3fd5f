@@ -1,0 +1,53 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="true" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit List</title>
+<style>
+/* Your existing CSS styles */
+.logout-button {
+    padding: 10px 15px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.logout-button:hover {
+    background-color: #c82333;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <h1>Edit List</h1>
+        <form action="logout" method="get" style="display: inline;">
+            <button type="submit" class="logout-button">Logout</button>
+        </form>
+    </div>
+    <div class="container">
+        <h2>Update List Details</h2>
+        <form action="editList" method="post">
+            <%
+                com.entity.List list = (com.entity.List) request.getAttribute("list");
+                if (list != null) {
+            %>
+            <input type="hidden" name="listId" value="<%= list.getId() %>">
+            <label for="name">List Name</label>
+            <input type="text" name="name" id="name" value="<%= list.getName() %>" required>
+            <button type="submit">Save Changes</button>
+            <%
+                } else {
+            %>
+            <p>List not found.</p>
+            <%
+                }
+            %>
+        </form>
+    </div>
+</body>
+</html>

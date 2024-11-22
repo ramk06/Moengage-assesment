@@ -1,0 +1,122 @@
+package com.servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/search")
+public class SearchServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Retrieve username from session
+        String username = (String) request.getSession().getAttribute("username");
+
+        // Validate user session
+        if (username == null) {
+            response.sendRedirect("login.jsp?error=unauthorized");
+            return;
+        }
+
+        // Fetch saved lists for the user
+        List<List> savedLists = fetchSavedLists(username);
+
+        // Retrieve filter input
+        String filter = request.getParameter("filter");
+
+        // Initialize variables for search results
+        List<String> responseCodes = new ArrayList<>();
+        List<String> images = new ArrayList<>();
+
+        // Perform search if filter is provided
+        if (filter != null && !filter.isEmpty()) {
+            if (isInvalidFilter(filter)) {
+                response.sendRedirect("search.jsp?error=invalid");
+                return;
+            }
+
+            // Generate response codes and fetch images
+            responseCodes = generateResponseCodes(filter);
+            images = fetchImageUrls(responseCodes);
+        }
+
+        // Set attributes for the JSP
+        request.setAttribute("savedLists", savedLists);
+        request.setAttribute("images", images);
+        request.getRequestDispatcher("search.jsp").forward(request, response);
+    }
+
+    // Validates the filter input
+    private boolean isInvalidFilter(String filter) {
+        return filter == null || filter.isEmpty();
+    }
+
+    // Generates response codes based on the filter
+    private List<String> generateResponseCodes(String filter) {
+        List<String> codes = new ArrayList<>();
+
+        if (filter.endsWith("xx")) { // Handle 'xx' wildcard filters (e.g., 2xx)
+            char prefix = filter.charAt(0); // Get the first digit (e.g., '2' for '2xx')
+            for (int i = 0; i <= 9; i++) {
+                for (int j = 0; j <= 9; j++) {
+                    codes.add(prefix + "" + i + j); // Generate all codes like 200, 201, ..., 299
+                }
+            }
+        } else if (filter.endsWith("x")) { // Handle 'x' wildcard filters (e.g., 23x)
+            char prefix1 = filter.charAt(0); // Get the first digit (e.g., '2' for '23x')
+            char prefix2 = filter.charAt(1); // Get the second digit (e.g., '3' for '23x')
+            for (int i = 0; i <= 9; i++) {
+                codes.add(prefix1 + "" + prefix2 + i); // Generate all codes like 230, 231, ..., 239
+            }
+        } else { // Handle exact matches
+            codes.add(filter); // Add the exact filter (e.g., '203')
+        }
+
+        return codes;
+    }
+    // Fetches the image URLs corresponding to the response codes
+    private List<String> fetchImageUrls(List<String> responseCodes) {
+        List<String> images = new ArrayList<>();
+        for (String code : responseCodes) {
+            String imageUrl = "https://http.dog/" + code + ".jpg";
+            images.add(imageUrl);
+        }
+        return images;
+    }
+
+
+    // Fetches the saved lists for the logged-in user
+    private List<List> fetchSavedLists(String username) {
+        EntityManagerFactory factory = null;
+        EntityManager manager = null;
+
+        try {
+            factory = Persistence.createEntityManagerFactory("E1");
+            manager = factory.createEntityManager();
+
+            // Fetch the lists for the user
+            return manager.createQuery("SELECT l FROM List l WHERE l.username = :username", List.class)
+                          .setParameter("username", username)
+                          .getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>(); // Return an empty list on failure
+        } finally {
+            if (manager != null) {
+                manager.close();
+            }
+            if (factory != null) {
+                factory.close();
+            }
+        }
+    }
+}

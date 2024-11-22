@@ -1,0 +1,109 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="true" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Lists</title>
+<style>
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: #f4f4f4;
+}
+.header {
+	background-color: #007bff;
+	color: white;
+	padding: 15px;
+	text-align: center;
+}
+.container {
+	padding: 20px;
+	margin: 0 auto;
+	width: 80%;
+	max-width: 900px;
+	background: white;
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+h2 {
+	text-align: center;
+	margin-bottom: 20px;
+}
+.list-container {
+	width: 100%;
+	margin-top: 20px;
+}
+.list-item {
+	padding: 15px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	background-color: #f9f9f9;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+}
+.list-item span {
+	font-weight: bold;
+}
+.list-actions button {
+	padding: 10px 20px;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-size: 14px;
+	margin-left: 10px;
+}
+.list-actions button.delete {
+	background-color: #dc3545;
+}
+.list-actions button:hover {
+	opacity: 0.9;
+}
+</style>
+</head>
+<body>
+	<div class="header">
+		<h1>My Lists</h1>
+		<p>Welcome, <%= session.getAttribute("username") %></p>
+	</div>
+	<div class="container">
+		<h2>Your Saved Lists</h2>
+		<div class="list-container">
+			<%
+				java.util.List<com.entity.List> savedLists = (java.util.List<com.entity.List>) request.getAttribute("savedLists");
+				if (savedLists != null && !savedLists.isEmpty()) {
+					for (com.entity.List savedList : savedLists) {
+			%>
+			<div class="list-item">
+				<span><%= savedList.getName() %></span>
+				<div class="list-actions">
+					<!-- Delete button -->
+					<form action="deleteList" method="post" style="display:inline;">
+						<input type="hidden" name="listId" value="<%= savedList.getId() %>">
+						<button type="submit" class="delete">Delete</button>
+					</form>
+					<!-- Edit button -->
+					<form action="editList" method="get" style="display:inline;">
+						<input type="hidden" name="listId" value="<%= savedList.getId() %>">
+						<button type="submit">Edit</button>
+					</form>
+				</div>
+			</div>
+			<%
+					}
+				} else {
+			%>
+			<p>No saved lists found.</p>
+			<%
+				}
+			%>
+		</div>
+	</div>
+</body>
+</html>

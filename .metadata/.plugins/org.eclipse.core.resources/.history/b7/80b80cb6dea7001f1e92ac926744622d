@@ -1,0 +1,180 @@
+package com.servlet;
+
+import java.io.IOException;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.entity.User;
+
+@WebServlet("<!DOCTYPE html>\r\n"
+		+ "<html lang=\"en\">\r\n"
+		+ "<head>\r\n"
+		+ "<meta charset=\"UTF-8\">\r\n"
+		+ "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n"
+		+ "<title>Signup</title>\r\n"
+		+ "<style>\r\n"
+		+ "body {\r\n"
+		+ "	font-family: Arial, sans-serif;\r\n"
+		+ "	display: flex;\r\n"
+		+ "	justify-content: center;\r\n"
+		+ "	align-items: center;\r\n"
+		+ "	height: 100vh;\r\n"
+		+ "	margin: 0;\r\n"
+		+ "	background-color: #f9f9f9;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".container {\r\n"
+		+ "	width: 350px;\r\n"
+		+ "	padding: 20px;\r\n"
+		+ "	background: white;\r\n"
+		+ "	border-radius: 10px;\r\n"
+		+ "	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);\r\n"
+		+ "	text-align: center;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".container h2 {\r\n"
+		+ "	margin-bottom: 20px;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".form-group {\r\n"
+		+ "	margin-bottom: 15px;\r\n"
+		+ "	text-align: left;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".form-group label {\r\n"
+		+ "	display: block;\r\n"
+		+ "	margin-bottom: 5px;\r\n"
+		+ "	font-weight: bold;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".form-group input {\r\n"
+		+ "	width: 50%;\r\n"
+		+ "	padding: 10px;\r\n"
+		+ "	border: 1px solid #ccc;\r\n"
+		+ "	border-radius: 5px;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".button {\r\n"
+		+ "	width: 100%;\r\n"
+		+ "	padding: 10px;\r\n"
+		+ "	background-color: #28a745;\r\n"
+		+ "	color: white;\r\n"
+		+ "	border: none;\r\n"
+		+ "	border-radius: 5px;\r\n"
+		+ "	cursor: pointer;\r\n"
+		+ "	font-size: 16px;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".button:hover {\r\n"
+		+ "	background-color: #218838;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".link {\r\n"
+		+ "	display: block;\r\n"
+		+ "	margin-top: 10px;\r\n"
+		+ "	text-decoration: none;\r\n"
+		+ "	color: #007bff;\r\n"
+		+ "}\r\n"
+		+ "\r\n"
+		+ ".link:hover {\r\n"
+		+ "	text-decoration: underline;\r\n"
+		+ "}\r\n"
+		+ "</style>\r\n"
+		+ "</head>\r\n"
+		+ "<body>\r\n"
+		+ "	<div class=\"container\">\r\n"
+		+ "		<h2>Signup</h2>\r\n"
+		+ "		<form action=\"servlet/SignupServlet\" method=\"post\">\r\n"
+		+ "			<div class=\"form-group\">\r\n"
+		+ "				<label for=\"username\">Username</label> <input type=\"text\"\r\n"
+		+ "					id=\"username\" name=\"username\" placeholder=\"Enter your username\"\r\n"
+		+ "					required>\r\n"
+		+ "			</div>\r\n"
+		+ "			<div class=\"form-group\">\r\n"
+		+ "				<label for=\"email\">Email</label> <input type=\"email\" id=\"email\"\r\n"
+		+ "					name=\"email\" placeholder=\"Enter your email\" required>\r\n"
+		+ "			</div>\r\n"
+		+ "			<div class=\"form-group\">\r\n"
+		+ "				<label for=\"password\">Password</label> <input type=\"password\"\r\n"
+		+ "					id=\"password\" name=\"password\" placeholder=\"Enter your password\"\r\n"
+		+ "					required>\r\n"
+		+ "			</div>\r\n"
+		+ "			<button type=\"submit\" class=\"button\">Signup</button>\r\n"
+		+ "		</form>\r\n"
+		+ "\r\n"
+		+ "		<a href=\"login.jsp\" class=\"link\">Already have an account? Login</a>\r\n"
+		+ "	</div>\r\n"
+		+ "</body>\r\n"
+		+ "</html>\r\n"
+		+ "")
+public class Signin {
+	private static final long serialVersionUID = 1L;
+
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Get form data
+        String username = req.getParameter("username");
+        String email = req.getParameter("email");
+        String password = req.getParameter("password");
+        
+        System.out.println("Username: " + username);
+        System.out.println("Email: " + email);
+        System.out.println("Password: " + password);
+
+
+        // Input validation
+        if (username == null || username.isEmpty() || 
+            email == null || email.isEmpty() || 
+            password == null || password.isEmpty()) {
+            resp.sendRedirect("signup.jsp?error=invalid");
+            return;
+        }
+
+        // Create User object and set properties
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(password);
+
+        // Initialize JPA components
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory("E1");
+        EntityManager manager = factory.createEntityManager();
+        EntityTransaction transaction = manager.getTransaction();
+
+        try {
+            transaction.begin();
+
+            // Check if the user already exists
+            User existingUser = manager.find(User.class, username);
+            if (existingUser != null) {
+                // User already exists
+                resp.sendRedirect("signup.jsp?error=exists");
+            } else {
+                // Save the new user to the database
+                manager.persist(user);
+                transaction.commit();
+
+                // Redirect to login page
+                resp.sendRedirect("login.jsp?message=registered");
+            }
+        } catch (Exception e) {
+            // Rollback in case of an error
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            resp.sendRedirect("signup.jsp?error=exception");
+        } finally {
+            if (manager != null) {
+                manager.close();
+            }
+            factory.close();
+        }
+    }
+}

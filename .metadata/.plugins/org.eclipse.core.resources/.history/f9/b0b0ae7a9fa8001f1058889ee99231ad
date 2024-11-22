@@ -1,0 +1,51 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="true" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Page</title>
+    <style>
+        /* Add your styles here */
+    </style>
+    <script>
+        // Validate input before form submission
+        function validateSearchForm() {
+            const filterInput = document.querySelector('input[name="filter"]');
+            if (!filterInput.value.trim()) {
+                alert("Please enter a valid response code.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Search Page</h1>
+        <p>Welcome, <%= session.getAttribute("username") %></p>
+        <a href="logout" style="color: red;">Logout</a>
+    </div>
+    <div class="container">
+        <% if (request.getParameter("error") != null) { %>
+            <div class="error-message">
+                <% if ("invalid".equals(request.getParameter("error"))) { %>
+                    Invalid input! Please try again.
+                <% } else { %>
+                    An error occurred. Please try again.
+                <% } %>
+            </div>
+        <% } else if (request.getParameter("success") != null) { %>
+            <div class="success-message">
+                Item added successfully!
+            </div>
+        <% } %>
+
+        <form action="search" method="get" onsubmit="return validateSearchForm();">
+            <input type="text" name="filter" placeholder="Enter code (e.g., 200, 2xx)" required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</body>
+</html>

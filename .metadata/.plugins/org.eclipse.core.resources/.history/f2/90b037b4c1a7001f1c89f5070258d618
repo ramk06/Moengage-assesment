@@ -1,0 +1,14 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome</title>
+</head>
+<body>
+	<div class="container">
+		<h1>MoEngage Assignment</h1>
+		<a href="login.jsp" class="button">Login</a> <a href="signup.jsp"
+			class="button">Signup</a>
+	</div>
+</body>
+</html>

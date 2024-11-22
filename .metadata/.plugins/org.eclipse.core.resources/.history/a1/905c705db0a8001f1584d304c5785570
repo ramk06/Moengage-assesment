@@ -1,0 +1,54 @@
+package com.servlet;
+
+import java.io.IOException;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/lists")
+public class ListPageServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = (String) request.getSession().getAttribute("username");
+
+        // Validate session
+        if (username == null) {
+            response.sendRedirect("login.jsp?error=unauthorized");
+            return;
+        }
+
+        EntityManagerFactory factory = null;
+        EntityManager manager = null;
+
+        try {
+            factory = Persistence.createEntityManagerFactory("E1");
+            manager = factory.createEntityManager();
+
+            // Fetch all lists for the user
+            List<com.entity.List> savedLists = manager
+                    .createQuery("SELECT l FROM List l WHERE l.username = :username", com.entity.List.class)
+                    .setParameter("username", username)
+                    .getResultList();
+
+            // Set the lists in the request scope
+            request.setAttribute("savedLists", savedLists);
+
+            // Forward to lists.jsp
+            request.getRequestDispatcher("lists.jsp").forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("error.jsp"); // Redirect to a generic error page
+        } finally {
+            if (manager != null) manager.close();
+            if (factory != null) factory.close();
+        }
+    }
+}

@@ -1,0 +1,50 @@
+package com.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
+
+@Entity
+@Table(name = "lists")
+public class List {
+
+    @Id
+    private int id; // Primary Key
+    private String name; // List name
+    private Date creationDate; // List creation date
+    private User username; // Username associated with the list
+
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public User getUsername() {
+        return username;
+    }
+
+    public void setUsername(User user) {
+        this.username = user;
+    }
+}

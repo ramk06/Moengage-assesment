@@ -1,0 +1,139 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="true" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Page</title>
+<style>
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: #f4f4f4;
+}
+.header {
+	background-color: #007bff;
+	color: white;
+	padding: 15px;
+	text-align: center;
+}
+.container {
+	padding: 20px;
+	margin: 0 auto;
+	width: 80%;
+	max-width: 900px;
+	background: white;
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+h2 {
+	text-align: center;
+	margin-bottom: 20px;
+}
+.filter-form {
+	margin-bottom: 20px;
+	text-align: center;
+}
+.filter-form input {
+	padding: 10px;
+	width: 70%;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+.filter-form button {
+	padding: 10px 20px;
+	background-color: #28a745;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-size: 16px;
+}
+.filter-form button:hover {
+	background-color: #218838;
+}
+.images-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	justify-content: center;
+}
+.images-container img {
+	width: 150px;
+	height: 150px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+.save-button {
+	display: block;
+	margin: 20px auto;
+	padding: 10px 20px;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-size: 16px;
+	text-align: center;
+}
+.save-button:hover {
+	background-color: #0056b3;
+}
+</style>
+</head>
+<body>
+	<div class="header">
+		<h1>Search Page</h1>
+		<p>Welcome, <%= session.getAttribute("username") %></p>
+	</div>
+	<div class="container">
+		<h2>Search by Response Code</h2>
+		<form class="filter-form" action="search" method="get">
+			<input type="text" name="filter" placeholder="Enter response code (e.g., 2xx, 203)" required>
+			<button type="submit">Search</button>
+		</form>
+
+		<div class="images-container">
+			<!-- Dog images will be dynamically inserted here -->
+			<%
+				if (request.getAttribute("images") != null) {
+					java.util.List<String> images = (java.util.List<String>) request.getAttribute("images");
+					for (String imgUrl : images) {
+			%>
+						<img src="<%= imgUrl %>" alt="Dog Image">
+			<%
+					}
+				}
+			%>
+		</div>
+		<div class="saved-lists">
+    <h3>Your Saved Lists</h3>
+    <ul>
+        <% 
+            java.util.List<com.entity.List> savedLists = (java.util.List<com.entity.List>) request.getAttribute("savedLists");
+            if (savedLists != null && !savedLists.isEmpty()) {
+                for (com.entity.List savedList : savedLists) {
+        %>
+            <li>
+                <strong><%= savedList.getName() %></strong> - 
+                Created on: <%= savedList.getCreationDate() %>
+            </li>
+        <% 
+                }
+            } else { 
+        %>
+            <li>No saved lists found.</li>
+        <% } %>
+    </ul>
+</div>
+		
+
+		<form action="saveList" method="post">
+			<input type="hidden" name="filter" value="<%= request.getParameter("filter") %>">
+			<button type="submit" class="save-button">Save List</button>
+		</form>
+	</div>
+</body>
+</html>

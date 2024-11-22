@@ -1,0 +1,47 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="true" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Page</title>
+<style>
+/* Add your styles here */
+</style>
+<script>
+// Validate search form
+function validateSearchForm() {
+	const filterInput = document.querySelector('input[name="filter"]');
+	if (!filterInput.value.trim()) {
+		alert('Please enter a response code to search.');
+		return false;
+	}
+	return true;
+}
+</script>
+</head>
+<body>
+	<div class="header">
+		<h1>Search Page</h1>
+		<p>Welcome, <%= session.getAttribute("username") %></p>
+		<% if (session.getAttribute("username") != null) { %>
+			<p class="logout"><a href="logout" style="color: red;">Logout</a></p>
+		<% } %>
+	</div>
+	<div class="container">
+		<!-- Success/Error Messages -->
+		<% if (request.getParameter("success") != null) { %>
+			<div class="message">Item added successfully to the list!</div>
+		<% } else if (request.getParameter("error") != null) { %>
+			<div class="error-message">An error occurred. Please try again.</div>
+		<% } %>
+
+		<h2>Search by Response Code</h2>
+		<form action="search" method="get" onsubmit="return validateSearchForm();">
+			<input type="text" name="filter" placeholder="Enter response code (e.g., 2xx, 203)">
+			<button type="submit">Search</button>
+		</form>
+	</div>
+</body>
+</html>
